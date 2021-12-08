@@ -194,8 +194,8 @@ func search() {
 		}
 		return nil
 	})
-	offset := f.Int("offset", 0, "specify offset")
-	limit := f.Int("limit", 0, "specify limit")
+	page := f.Int("page", 0, "specify page")
+	pageSize := f.Int("pageSize", 0, "specify pageSize")
 	f.Func("f", "specify field filter, format: field:val1,val2,...", func(filter string)error{
 		if len(filter) == 0 {
 			return nil
@@ -232,22 +232,22 @@ func search() {
 		os.Exit(3)
 	}
 	if len(*index) == 0  || len(*q) == 0 {
-		fmt.Fprintf(os.Stderr, "%s search -index=xxx -q=xx -s=xx -offset=xx -limit=xx -fl=xxx\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "%s search -index=xxx -q=xx -s=xx -page=xx -pageSize=xx -fl=xxx\n", os.Args[0])
 		os.Exit(4)
 	}
-	if *offset> 0 {
-		options = append(options, gssdk.Offset(*offset))
+	if *page> 0 {
+		options = append(options, gssdk.Page(*page))
 	}
-	if *limit > 0 {
-		options = append(options, gssdk.Limit(*limit))
+	if *pageSize > 0 {
+		options = append(options, gssdk.PageSize(*pageSize))
 	}
 
-	docs, header, err := gssdk.Search(*index, *q, options...)
+	docs, pagination, err := gssdk.Search(*index, *q, options...)
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
 		os.Exit(5)
 	}
 	jEnc := json.NewEncoder(os.Stdout)
-	jEnc.Encode(header)
+	jEnc.Encode(pagination)
 	jEnc.Encode(docs)
 }

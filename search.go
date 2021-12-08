@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func Search(index string, q string, options ...Option) (docs []Doc, resultHeader *ResultHeader, err error) {
+func Search(index string, q string, options ...Option) (docs []Doc, pagination *Pagination, err error) {
 	if len(q) == 0 {
 		err = fmt.Errorf("param q expeted")
 		return
@@ -19,7 +19,13 @@ func Search(index string, q string, options ...Option) (docs []Doc, resultHeader
 	url := fmt.Sprintf("%s/indexes/%s/search", SearcherBaseUrl, index)
 
 	var res struct {
-		*ResultHeader
+		Total uint64 `json:"nbHits"`
+		Offset uint64 `json:"offset"`
+		Limit int `json:"limit"`
+		Exhaustive bool `json:"exhaustiveNbHits"`
+		SearchTimeMs int `json:"processingTimeMs"`
+		Query string `json:"query"`
+
 		Docs []Doc `json:"hits"`
 	}
 	var status int
@@ -31,6 +37,12 @@ func Search(index string, q string, options ...Option) (docs []Doc, resultHeader
 		return
 	}
 	docs = res.Docs
-	resultHeader = res.ResultHeader
+	pagination = &Pagination{
+		Total: res.Total,
+		Pages: res.Total + uint64(query.pageSize - 1) / uint64(query.pageSize),
+		PageSize: query.pageSize,
+		CurrPageNo: uint64(query.page),
+		DocsInPage: len(res.Docs),
+	}
 	return
 }

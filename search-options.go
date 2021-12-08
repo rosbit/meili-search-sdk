@@ -9,7 +9,7 @@ type query struct {
 	q string
 	sorting []string
 	f []string
-	offset, limit int
+	page, pageSize int
 	fl []string
 }
 
@@ -26,11 +26,14 @@ func (q *query) makeQuery() map[string]interface{} {
 	if len(q.q) > 0 {
 		res["q"] = q.q
 	}
-	if q.offset > 0 {
-		res["offset"] = q.offset
+	if q.pageSize <= 0 || q.pageSize > 100 {
+		q.pageSize = 20
 	}
-	if q.limit > 0 && q.limit <= 100 {
-		res["limit"] = q.limit
+	res["limit"] = q.pageSize
+	if q.page > 0 {
+		res["offset"] = (q.page-1) * q.pageSize
+	} else {
+		q.page = 1
 	}
 	if len(q.f) > 0 {
 		res["filter"] = strings.Join(q.f, " AND ")
@@ -65,15 +68,15 @@ func Filter(field string, vals []string) Option {
 	}
 }
 
-func Offset(offset int) Option {
+func Page(page int) Option {
 	return func(q *query) {
-		q.offset = offset
+		q.page = page
 	}
 }
 
-func Limit(limit int) Option {
+func PageSize(pageSize int) Option {
 	return func(q *query) {
-		q.limit = limit
+		q.pageSize = pageSize
 	}
 }
 
