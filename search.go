@@ -39,7 +39,7 @@ func Search(index string, q string, options ...Option) (docs []Doc, pagination *
 	docs = res.Docs
 	pagination = &Pagination{
 		Total: res.Total,
-		Pages: res.Total + uint64(query.pageSize - 1) / uint64(query.pageSize),
+		Pages: (res.Total + uint64(query.pageSize - 1)) / uint64(query.pageSize),
 		PageSize: query.pageSize,
 		CurrPageNo: uint64(query.page),
 		DocsInPage: len(res.Docs),
