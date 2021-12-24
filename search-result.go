@@ -1,5 +1,9 @@
 package gssdk
 
+import (
+	"encoding/json"
+)
+
 type Pagination struct {
 	Total uint64
 	Pages uint64
@@ -8,4 +12,4 @@ type Pagination struct {
 	DocsInPage int
 }
 
-type Doc map[string]interface{}
+type Doc = json.RawMessage
